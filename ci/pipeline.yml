@@ -1,0 +1,41 @@
+---
+resources:
+- name: moviefun-service-source
+  type: git
+  source:
+    uri: https://github.com/arumugham86/apps-movie-fun-code.git  #<---- REPLACE ME
+    branch: spring-boot
+
+- name: deploy-moviefun-service
+  type: cf
+  source:
+    api: api.system.cumuluslabs.io        #<---- REPLACE ME
+    username: {{cf-user}}
+    password: {{cf-password}}
+    organization: garumugham-pal    #<---- REPLACE ME
+    space: sandbox         #<---- REPLACE ME
+    skip_cert_check: true
+
+jobs:
+- name: deploy
+  public: true
+  plan:
+  - get: moviefun-service-source
+    trigger: true
+  - task: package
+    file: moviefun-service-source/ci/tasks/package.yml
+  - put: deploy-moviefun-service
+    params:
+      manifest: moviefun-service-source/manifest.yml
+      path: package-output/moviefun.war
+
+- name: smoke_test
+  public: true
+  plan:
+  - get: moviefun-service-source
+    trigger: true
+    passed: [deploy]
+  - task: smoke_test
+    file: moviefun-service-source/ci/tasks/test.yml
+    params:
+      ATTENDEE_SERVICE_URL: http://moviefun-unechoic-steadfastness.apps.cumuluslabs.io  #<---- REPLACE ME
