@@ -14,5 +14,5 @@ outputs:
 - name: package-output
 
 run:
-  path: moviefun/ci/tasks/package.sh
+  path: moviefun-service-source/ci/tasks/package.sh
 
